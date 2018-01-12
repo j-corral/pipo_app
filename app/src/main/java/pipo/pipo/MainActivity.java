@@ -1,17 +1,13 @@
 package pipo.pipo;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.StrictMode;
@@ -176,7 +172,7 @@ public class MainActivity extends Activity {
     }
 
     public void executeCommand(String command) {
-        Toast.makeText(MainActivity.this, command, Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, command, Toast.LENGTH_SHORT).show();
         try {
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             out.println(command);
@@ -200,6 +196,8 @@ public class MainActivity extends Activity {
         clientThread.start();
         enableAllButtons();
         button_connect.setText("Disconnect");
+        this.isConnected = true;
+        //this.loadIpCam();
     }
 
     public void disconnectPipo() {
@@ -213,6 +211,7 @@ public class MainActivity extends Activity {
         clientThread.interrupt();
         disableAllButtons();
         button_connect.setText("Connect");
+        this.isConnected = false;
     }
 
     private void enableAllButtons() {
@@ -258,20 +257,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    /*
-    class ClientThread implements Runnable {
-        @Override
-        public void run() {
-            try {
-                InetAddress serverAddress = InetAddress.getByName(SERVER_IP);
-                socket = new Socket(serverAddress, SERVER_PORT);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-        }
-    }
-    */
-
     class ClientThread extends Thread {
         @Override
         public void run() {
@@ -284,7 +269,6 @@ public class MainActivity extends Activity {
         }
     }
 
-
     private DisplayMode calculateDisplayMode() {
         int orientation = getResources().getConfiguration().orientation;
         return orientation == Configuration.ORIENTATION_LANDSCAPE ?
@@ -292,8 +276,10 @@ public class MainActivity extends Activity {
     }
 
     private void loadIpCam() {
+
         Mjpeg.newInstance()
-                .open("tcp/h264://" + SERVER_IP + ":" + STREAM_PORT, 5)
+                //.open("tcp/h264://" + SERVER_IP + ":" + STREAM_PORT, 5)
+                .open("http://" + SERVER_IP +":8081/stream.mjpeg", 5)
                 .subscribe(
                         inputStream -> {
                             streamView.setSource(inputStream);
